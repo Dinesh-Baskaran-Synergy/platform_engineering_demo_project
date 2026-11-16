@@ -1,0 +1,79 @@
+name: evals
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      category:
+        description: "Categories to run live (comma-separated, or 'all')"
+        default: "all"
+      workers:
+        description: "Parallel workers (lower if you hit rate limits)"
+        default: "2"
+
+permissions:
+  contents: read
+
+jobs:
+  mock:
+    name: Unit tests + mock evals (no API key, no network)
+    if: github.event_name != 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      EVAL_MODE: mock
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Unit tests (app + graders)
+        run: python -m pytest
+      - name: Mock evals (fails if thresholds in evals/config.yaml are not met)
+        run: python -m evals.runner --mode mock --workers 4
+      - name: Compare with committed baseline (fails on per-case regressions)
+        run: python -m evals.compare
+      - name: Add report to job summary
+        if: always()
+        run: test -f results/report.md && cat results/report.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mock-eval-results
+          path: results/
+
+  live:
+    name: Live evals via LiteLLM (manual)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    env:
+      EVAL_MODE: live
+      LITELLM_API_BASE: ${{ secrets.LITELLM_API_BASE }}
+      LITELLM_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+      APP_MODEL: ${{ secrets.APP_MODEL }}
+      JUDGE_MODEL: ${{ secrets.JUDGE_MODEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Doctor (env check + one tiny call per model; never prints secrets)
+        run: python -m app.doctor
+      - name: Live evals (fails if pass rate drops below thresholds in evals/config.yaml)
+        run: python -m evals.runner --mode live --category "${{ inputs.category }}" --workers "${{ inputs.workers }}"
+      - name: Judge calibration (informational)
+        if: always()
+        run: python -m evals.judge_calibration.calibrate --mode live || true
+      - name: Add report to job summary
+        if: always()
+        run: test -f results/report.md && cat results/report.md >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-eval-results
+          path: results/
