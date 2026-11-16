@@ -1,0 +1,38 @@
+# Sample LiteLLM proxy config — only needed if you run your OWN proxy:
+#   pip install 'litellm[proxy]'
+#   litellm --config litellm_config.example.yaml --port 4000
+# Then in .env:
+#   LITELLM_API_BASE=http://localhost:4000
+#   LITELLM_API_KEY=<the master_key / virtual key you configured>
+#   APP_MODEL=openai/acme-app        (the "openai/" prefix = talk OpenAI-protocol to the proxy)
+#   JUDGE_MODEL=openai/acme-judge
+#
+# Real provider keys stay on the proxy host as env vars (os.environ/...), never in this file.
+
+model_list:
+  - model_name: acme-app                 # alias your app uses
+    litellm_params:
+      model: anthropic/<model-id>        # replace with a real provider model id
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: acme-judge               # use a DIFFERENT model than the app to limit self-preference bias
+    litellm_params:
+      model: openai/<model-id>
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: acme-fallback
+    litellm_params:
+      model: bedrock/<model-id>
+      aws_region_name: os.environ/AWS_REGION_NAME
+
+router_settings:
+  num_retries: 3
+  timeout: 60
+  fallbacks:
+    - acme-app: ["acme-fallback"]
+
+litellm_settings:
+  drop_params: true
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

@@ -1,0 +1,9 @@
+# Pinned to the versions this project is tested with (CI and `make setup` install exactly these).
+# Upgrade deliberately: bump, run `make test && make eval && make compare`, then commit.
+litellm==1.109.1
+pydantic==2.14.3
+jsonschema==4.26.0
+rich==15.0.0
+PyYAML==6.0.3
+python-dotenv==1.2.4
+pytest==9.2.0
