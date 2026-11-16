@@ -1,0 +1,25 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+
+# Generated eval output (baseline is committed on purpose)
+results/*.json
+!results/baseline.json
+results/*.md
+results/runs/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
