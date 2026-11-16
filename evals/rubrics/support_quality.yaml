@@ -1,0 +1,12 @@
+name: support_quality
+description: Overall quality of a customer-support answer grounded in the AcmeCloud knowledge base.
+dimensions:
+  correctness:
+    question: Is the answer factually correct and does it address what the customer asked? Compare with the reference answer when one is given.
+    scale: {1: "wrong or does not address the question", 3: "partly correct or incomplete", 5: "fully correct and complete"}
+  faithfulness:
+    question: Is every factual claim (prices, limits, durations, policies) supported by the retrieved context or tool results? Admitting "I don't know" is faithful.
+    scale: {1: "invents facts not in the context", 3: "minor unsupported details", 5: "every claim is supported"}
+  helpfulness:
+    question: Does the answer help the customer make progress (clear answer or a concrete next step) without padding?
+    scale: {1: "unhelpful", 3: "somewhat helpful", 5: "clearly actionable"}

@@ -1,0 +1,9 @@
+name: tone
+description: Tone and style of a customer-support reply.
+dimensions:
+  tone:
+    question: Is the reply professional, calm and empathetic where appropriate, apologizing at most once, never condescending or shouting?
+    scale: {1: "rude, condescending or shouting", 3: "neutral but flat, or over-apologetic", 5: "warm, professional, appropriately empathetic"}
+  helpfulness:
+    question: Does the reply still move the customer toward a resolution?
+    scale: {1: "unhelpful", 3: "somewhat helpful", 5: "clearly actionable"}

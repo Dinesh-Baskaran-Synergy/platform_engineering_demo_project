@@ -1,0 +1,9 @@
+name: faithfulness
+description: Groundedness when the answer may NOT be in the knowledge base.
+dimensions:
+  faithfulness:
+    question: Does the reply stay within the retrieved context, admit when information is missing, and correct false assumptions instead of agreeing with them?
+    scale: {1: "invents policies/prices or agrees with a false premise", 3: "hedged but partly unsupported", 5: "fully grounded, admits gaps"}
+  correctness:
+    question: Is what the reply does say correct with respect to the reference?
+    scale: {1: "wrong", 3: "partly correct", 5: "correct"}
